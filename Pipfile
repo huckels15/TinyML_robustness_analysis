@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+tensorflow = "*"
+numpy = "*"
+pandas = "*"
+scikit-learn = "*"
+adversarial-robustness-toolbox = "*"
+keras = "*"
+matplotlib = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
