@@ -22,11 +22,11 @@ import keras_model
 # if False uses the full CIFAR10 validation set
 PERF_SAMPLE = True
 
-model_name = keras_model.get_model_name()
+model_name =  "trainedResnet_20241010_2013" #keras_model.get_model_name()
 
 if __name__ == "__main__":
 
-    cifar_10_dir = 'cifar-10-batches-py'
+    cifar_10_dir = '../../Datasets/cifar-10-batches-py'
 
     train_data, train_filenames, train_labels, test_data, test_filenames, test_labels, label_names = \
         train_resnet.load_cifar_10_data(cifar_10_dir)
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     label_classes = np.argmax(test_labels,axis=1)
     print("Label classes: ", label_classes.shape)
 
-    model = tf.keras.models.load_model('trained_models/' + model_name + '.h5')
+    model = tf.keras.models.load_model('../../attacks/models/' + model_name + '.h5')
 
     test_metrics = model.evaluate(x=test_data, y=test_labels, batch_size=32, verbose=1, return_dict=True)
 

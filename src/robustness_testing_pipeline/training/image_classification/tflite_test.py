@@ -12,10 +12,11 @@ import numpy as np
 import h5py
 import os
 import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 import train_resnet
 import eval_functions_eembc
-from sklearn.metrics import roc_auc_score
 import keras_model
+from sklearn.metrics import roc_auc_score
 
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -25,12 +26,15 @@ PERF_SAMPLE = False
 # if True uses quantized model
 QUANT_MODEL = True
 
-if QUANT_MODEL:
-    _name = keras_model.get_quant_model_name()
-    model_path = 'trained_models/' + _name + '_quant.tflite'
-else:
-    _name = keras_model.get_quant_model_name()
-    model_path = 'trained_models/' + _name + '.tflite'
+# if QUANT_MODEL:
+#     _name = keras_model.get_quant_model_name()
+#     model_path = 'models/' + _name + '_quant.tflite'
+# else:
+#     _name = keras_model.get_quant_model_name()
+#     model_path = 'models/' + _name + '.tflite'
+
+#model_path = "../../attacks/models/cifar_resnet_int8.tflite"
+model_path = "../../attacks/models/trainedResnet_20241010_2013_quant.tflite"
 
 if __name__ == '__main__':
     # Load the TFLite model and allocate tensors.
@@ -41,7 +45,7 @@ if __name__ == '__main__':
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
-    cifar_10_dir = 'cifar-10-batches-py'
+    cifar_10_dir = '../../Datasets/cifar-10-batches-py'
 
     train_data, train_filenames, train_labels, test_imgs, test_filenames, test_labels, label_names = \
         train_resnet.load_cifar_10_data(cifar_10_dir)

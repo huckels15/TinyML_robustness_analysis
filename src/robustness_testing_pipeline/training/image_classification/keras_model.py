@@ -18,13 +18,13 @@ from tensorflow.keras.regularizers import l2
 
 #get model
 def get_model_name():
-    if os.path.exists("trained_models/trainedResnet.h5"):
+    if os.path.exists("../../attacks/models/trainedResnet.h5"):
         return "trainedResnet"
     else:
         return "pretrainedResnet"
 
 def get_quant_model_name():
-    if os.path.exists("trained_models/trainedResnet.h5"):
+    if os.path.exists("../../attacks/models/trainedResnet.h5"):
         return "trainedResnet"
     else:
         return "pretrainedResnet"

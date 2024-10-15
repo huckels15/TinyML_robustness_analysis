@@ -10,11 +10,12 @@ model_converter.py desc: converts floating point model to fully int8
 import tensorflow as tf
 import numpy as np
 import train_resnet
-from test_resnet import model_name
 
-tfmodel_path = 'trained_models/' + model_name
+model_name = "trainedResnet_20241010_2013.h5"
+
+tfmodel_path = '../../attacks/models/' + model_name
 tfmodel = tf.keras.models.load_model(tfmodel_path)
-cifar_10_dir = 'cifar-10-batches-py'
+cifar_10_dir = '../../Datasets/cifar-10-batches-py'
 model_name = model_name[:-3]
 
 def representative_dataset_generator():
@@ -28,7 +29,7 @@ def representative_dataset_generator():
 if __name__ == '__main__':
     converter = tf.lite.TFLiteConverter.from_keras_model(tfmodel)
     tflite_model = converter.convert()
-    open('trained_models/' + model_name + '.tflite', 'wb').write(tflite_model)
+    open('../../attacks/models/' + model_name + '.tflite', 'wb').write(tflite_model)
 
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
@@ -36,4 +37,4 @@ if __name__ == '__main__':
     converter.inference_input_type = tf.int8
     converter.inference_output_type = tf.int8
     tflite_quant_model = converter.convert()
-    open('trained_models/' + model_name + '_quant.tflite', 'wb').write(tflite_quant_model)
+    open('../../attacks/models/' + model_name + '_quant.tflite', 'wb').write(tflite_quant_model)

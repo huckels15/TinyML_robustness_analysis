@@ -8,7 +8,7 @@ import keras_model
 
 import datetime
 
-EPOCHS = 500
+EPOCHS = 1  #500
 BS = 32
 
 # get date ant time to save model
@@ -122,7 +122,7 @@ def load_cifar_10_data(data_dir, negatives=False):
 if __name__ == "__main__":
     """load cifar10 data and trains model"""
 
-    cifar_10_dir = 'cifar-10-batches-py'
+    cifar_10_dir = '../../Datasets/cifar-10-batches-py'
 
     train_data, train_filenames, train_labels, test_data, test_filenames, test_labels, label_names = \
         load_cifar_10_data(cifar_10_dir)
@@ -169,4 +169,4 @@ if __name__ == "__main__":
     plt.plot(np.array(range(EPOCHS)), History.history['accuracy'])
     plt.savefig('train_loss_acc.png')
     model_name = f"trainedResnet_{year}{month:02d}{day:02d}_{hour:02d}{minute:02d}.h5"
-    new_model.save("trained_models/" + model_name)
+    new_model.save("../../attacks/models/" + model_name)
