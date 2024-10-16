@@ -186,13 +186,18 @@ class TensorFlowV2Classifier_Int8(ClassGradientsMixin, ClassifierMixin, TensorFl
         input_details = self._model.get_input_details()
         output_details = self._model.get_output_details()
         
-        input_data = x.reshape(input_details[0]['shape'])
-        self._model.set_tensor(input_details[0]['index'], input_data)
-        self._model.invoke()
-        output_data = self._model.get_tensor(output_details[0]['index'])
-        output_data = output_data.reshape(output_details[0]['shape'][1], )
+        # Initialize a list to store results for each image in the batch
+        results = []
 
-        return output_data
+        # Process each image in the batch individually
+        for i in range(x.shape[0]):
+            input_data = x[i].reshape(input_details[0]['shape'])  # Reshape each image to the required shape
+            self._model.set_tensor(input_details[0]['index'], input_data)
+            self._model.invoke()
+            output_data = self._model.get_tensor(output_details[0]['index'])
+            results.append(output_data.reshape(output_details[0]['shape'][1], ))  # Reshape output as required
+
+        return np.array(results)  # Return the batch of results
 
     def _predict_framework(self, x: "tf.Tensor", training_mode: bool = False) -> "tf.Tensor":
         """

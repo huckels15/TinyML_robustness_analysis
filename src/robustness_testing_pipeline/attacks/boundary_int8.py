@@ -70,6 +70,7 @@ def main():
     # Step 5: Generate adversarial test examples
     attack = BoundaryAttack_Int8(estimator=art_classifier, delta=cfgs['boundary_delta'],
                             epsilon=cfgs['boundary_epsilon'], batch_size=1, max_iter=cfgs['boundary_max_iter'], targeted=False)
+    print(x_test_float.shape)
     x_adv_float = attack.generate(x=x_test_float, y=y_test)
     x_adv_int8 = b.quantize_dataset_int8(x_adv_float, scaler_int8, zp_int8)
 

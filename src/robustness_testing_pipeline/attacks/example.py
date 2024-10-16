@@ -7,7 +7,7 @@ The parameters are chosen for reduced computational requirements of the script a
 
 import tensorflow as tf
 
-#tf.compat.v1.disable_eager_execution()
+tf.compat.v1.disable_eager_execution()
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPooling2D
 from tensorflow.keras.losses import categorical_crossentropy

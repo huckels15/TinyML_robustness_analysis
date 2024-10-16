@@ -11,7 +11,7 @@ from art.attacks.extraction.copycat_cnn import CopycatCNN
 from art.estimators.classification import KerasClassifier
 import numpy as np
 
-target_model = load_model("models/trainedResnet_20241010_2013.h5")
+target_model = load_model("models/trainedResnet_20241015_2232.h5")
 
 target_classifier = KerasClassifier(model=target_model)
 
@@ -36,10 +36,10 @@ theived_model = create_theived_model()
 theived_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
 theived_classifier = KerasClassifier(model=theived_model)
+ 
+copycat = CopycatCNN(target_classifier, 64, 64, 10, 100000)
 
-copycat = CopycatCNN(target_model, 64, 64, 10, 1000)
-
-new_class = copycat.extract(X_train, y_train, theived_classifier = theived_classifier)
+new_class = copycat.extract(X_train, y_train, thieved_classifier = theived_classifier)
 
 predictions = new_class.predict(X_test)
 accuracy = np.sum(np.argmax(predictions, axis=1) == np.argmax(y_test, axis=1)) / len(y_test)
