@@ -10,10 +10,11 @@ from tflite_to_cmsis import tflite_to_cmsis_main as cm
 from art.attacks.extraction.copycat_cnn_int8 import CopycatCNN_Int8
 from art.estimators.classification.tensorflow_int8 import TensorFlowV2Classifier_Int8
 from model_converter import representative_dataset_generator, convert_model
+from convert_vww import run_conversion
 from art.estimators.classification.tensorflow import TensorFlowV2Classifier
 
 
-def create_theived_model():
+def create_theived_model_cifar():
     model = Sequential()
     model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
     model.add(MaxPooling2D((2, 2)))
@@ -22,6 +23,14 @@ def create_theived_model():
     model.add(Dense(10, activation='softmax'))
     return model
 
+def create_theived_model_vww():
+    model = Sequential()
+    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(96, 96, 3)))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu'))
+    model.add(Dense(2, activation='softmax'))
+    return model
 
 def load_configs():
     parser = ArgumentParser(add_help=True)
@@ -65,8 +74,10 @@ def main():
 
     if cfgs['dataset_id'] == 'cifar10':
         input_shape = (32,32,3)
+        thieved_model = create_theived_model_cifar()
     elif cfgs['dataset_id'] == 'vww':
         input_shape = (96,96,3)
+        thieved_model = create_theived_model_vww()
 
     # Step 2: Load ANN/QNNs
     qnn_int8 = b.get_ml_quant_model(cfgs['target_int8'])
@@ -80,11 +91,11 @@ def main():
         x_train_float, y_train = ds.get_cifar10_train_ds_f32()
         x_test_float, y_test = ds.get_cifar10_test_ds_f32()
     elif cfgs['dataset_id'] == 'vww':
-        x_train_float, y_train = ds.get_vww_train_ds_f32()
+        # x_train_float, y_train = ds.get_vww_train_ds_f32() # PUT THIS BACK
         x_test_float, y_test = ds.get_vww_test_ds_f32()
 
     # x_test_float, y_test = x_test_float[0:1000], y_test[0:1000]
-    x_train_int8 = b.quantize_dataset_int8(x_train_float, scaler_int8, zp_int8)
+    # x_train_int8 = b.quantize_dataset_int8(x_train_float, scaler_int8, zp_int8) # PUT THIS BACK
     x_test_int8 = b.quantize_dataset_int8(x_test_float, scaler_int8, zp_int8)
 
     # Step 4: Evaluate classifier test examples
@@ -94,18 +105,20 @@ def main():
     # Step 5: Steal model
     attack = CopycatCNN_Int8(classifier=art_classifier, batch_size_fit=cfgs['batch_size_fit'],\
     batch_size_query=cfgs['batch_size_query'], nb_epochs=cfgs['nb_epochs'], nb_stolen=cfgs['nb_stolen'])
-    thieved_model = create_theived_model()
     thieved_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
     thieved_classifier = TensorFlowV2Classifier(model=thieved_model, nb_classes=cfgs['num_classes'], input_shape=input_shape, train_step=train_step)
-    print(x_test_float.shape)
-    stolen_model = attack.extract(x_train_float, y_train, thieved_classifier=thieved_classifier)
-    ## continue here
-    stolen_model.model.save("models/stolen_resnet.h5")
-    convert_model("stolen_resnet.h5")
-    stolen_int8 = b.get_ml_quant_model("models/stolen_resnet_quant.tflite")
+    stolen_model = attack.extract(x_test_float, y_test, thieved_classifier=thieved_classifier) # Change this back to train
+    stolen_model.model.save("models/stolen_model.h5")
+
+    if cfgs['dataset_id'] == 'cifar10':
+        convert_model("stolen_model.h5")
+    elif cfgs['dataset_id'] == 'vww':
+        run_conversion("stolen_model.h5")
 
 
-    # Step 6: Evaluate the classifiers on adversarial test examples
+    stolen_int8 = b.get_ml_quant_model("models/stolen_model_quant.tflite")
+
+    # Step 6: Evaluate the classifiers
     accuracy = b.get_accuracy_quant_model(stolen_int8, x_test_int8, y_test)
     print("Int8 -> Accuracy: {}%".format(accuracy * 100))
 
