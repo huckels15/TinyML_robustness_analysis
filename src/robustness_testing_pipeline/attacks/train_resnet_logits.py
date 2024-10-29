@@ -9,7 +9,7 @@ import keras_model_logits
 
 import datetime
 
-EPOCHS = 1  #500
+EPOCHS = 500
 BS = 32
 
 # get date ant time to save model
@@ -44,8 +44,8 @@ optimizer = tf.keras.optimizers.Adam()
 
 es = EarlyStopping(
     monitor="accuracy",
-    min_delta=0,
-    patience=5,
+    min_delta=0.001,
+    patience=10,
     verbose=0,
     mode="auto",
     baseline=None,
@@ -179,8 +179,8 @@ if __name__ == "__main__":
     History = new_model.fit(datagen.flow(train_data, train_labels, batch_size=BS),
               steps_per_epoch=int(len(train_data) // BS), epochs=EPOCHS, callbacks=[lr_scheduler, es])
 
-    plt.plot(np.array(range(EPOCHS)), History.history['loss'])
-    plt.plot(np.array(range(EPOCHS)), History.history['accuracy'])
-    plt.savefig('train_loss_acc.png')
-    model_name = f"trainedResnet_{year}{month:02d}{day:02d}_{hour:02d}{minute:02d}_logits.h5"
+    # plt.plot(np.array(range(EPOCHS)), History.history['loss'])
+    # plt.plot(np.array(range(EPOCHS)), History.history['accuracy'])
+    # plt.savefig('train_loss_acc.png')
+    model_name = f"trainedResnet_testable_logits.h5"
     new_model.save("models/" + model_name)

@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 from argparse import ArgumentParser
 import utils.backend as b
 import utils.dataset_loader as ds
@@ -12,16 +13,15 @@ from art.estimators.classification.tensorflow_int8 import TensorFlowV2Classifier
 from model_converter import representative_dataset_generator, convert_model
 from convert_vww import run_conversion
 from art.estimators.classification.tensorflow import TensorFlowV2Classifier
+import theived_templates_cifar
+import datetime
 
-
-def create_theived_model_cifar():
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
-    model.add(Dense(10, activation='linear'))
-    return model
+dt = datetime.datetime.today()
+year = dt.year
+month = dt.month
+day = dt.day
+hour = dt.hour
+minute = dt.minute
 
 def create_theived_model_vww():
     model = Sequential()
@@ -38,12 +38,14 @@ def load_configs():
     parser.add_argument("--batch_size_fit", type=int, default=64, help="number of samples to perturb")
     parser.add_argument("--batch_size_query", type=str, default=64, help="path to save the adversarial examples")
     parser.add_argument("--nb_epochs", type=float, default=100, help="")
-    parser.add_argument("--nb_stolen", type=float, default=1000, help="")
+    parser.add_argument("--nb_stolen", type=float, default=50000, help="")
     parser.add_argument("--num_classes", type=int, default=10, help="number of classes in target models")
     parser.add_argument("--target_int8", type=str, default=None, help="path to the int-8 QNN")
-    parser.add_argument("--sampling_strat", type=str, default="random", help="random or adaptive")
+    parser.add_argument("--sampling_strat", type=str, default="adaptive", help="random or adaptive")
     parser.add_argument("--reward", type=str, default="all", help="cert, div, loss, or all")
     parser.add_argument("--model_folder", type=str, default="/models", help="path to save thieved model")
+    parser.add_argument("--theived_template", type=str, default="basic", help="theived model architecture")
+
 
     cfgs = parser.parse_args()
 
@@ -75,8 +77,23 @@ def main():
     cfgs = load_configs()
 
     if cfgs['dataset_id'] == 'cifar10':
+        task = "cifar"
         input_shape = (32,32,3)
-        thieved_model = create_theived_model_cifar()
+        if cfgs['theived_template'] == 'vgg': 
+            thieved_model = theived_templates_cifar.create_vgg16_logits()
+            arch = 'vgg'
+        elif cfgs['theived_template'] == 'lenet': 
+            thieved_model = theived_templates_cifar.create_lenet_logits()
+            arch = 'lenet'
+        elif cfgs['theived_template'] == 'alexnet': 
+            thieved_model = theived_templates_cifar.create_alexnet_logits()
+            arch = 'alexnet'
+        elif cfgs['theived_template'] == 'resnet': 
+            thieved_model = theived_templates_cifar.create_resnet_logits()
+            arch = 'resnet'
+        else: 
+            thieved_model = theived_templates_cifar.create_basic_logits()
+            arch = 'basic'
     elif cfgs['dataset_id'] == 'vww':
         input_shape = (96,96,3)
         thieved_model = create_theived_model_vww()
@@ -97,7 +114,7 @@ def main():
         x_test_float, y_test = ds.get_vww_test_ds_f32()
 
     # x_test_float, y_test = x_test_float[0:1000], y_test[0:1000]
-    # x_train_int8 = b.quantize_dataset_int8(x_train_float, scaler_int8, zp_int8) # PUT THIS BACK
+    x_train_int8 = b.quantize_dataset_int8(x_train_float, scaler_int8, zp_int8) # PUT THIS BACK
     x_test_int8 = b.quantize_dataset_int8(x_test_float, scaler_int8, zp_int8)
 
     # Step 4: Evaluate classifier test examples
@@ -106,23 +123,39 @@ def main():
 
     # Step 5: Steal model
     attack = KnockoffNets_Int8(classifier=art_classifier, batch_size_fit=cfgs['batch_size_fit'],\
-    batch_size_query=cfgs['batch_size_query'], nb_epochs=cfgs['nb_epochs'], nb_stolen=cfgs['nb_stolen'])
+    batch_size_query=cfgs['batch_size_query'], nb_epochs=int(cfgs['nb_epochs']), nb_stolen=int(cfgs['nb_stolen']))
     thieved_model.compile(optimizer='adam', loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
     thieved_classifier = TensorFlowV2Classifier(model=thieved_model, nb_classes=cfgs['num_classes'], input_shape=input_shape, train_step=train_step)
-    stolen_model = attack.extract(x_test_float, y_test, thieved_classifier=thieved_classifier) # Change this back to train
-    stolen_model.model.save("models/stolen_model.h5")
+    stolen_model = attack.extract(x_train_float, y_train, thieved_classifier=thieved_classifier) # Change this back to train
+
+    stolen_name = f"knockoff_{arch}_{task}_{year}{month:02d}{day:02d}_{hour:02d}{minute:02d}"
+    stolen_model.model.save(f"models/{stolen_name}.h5")
 
     if cfgs['dataset_id'] == 'cifar10':
-        convert_model("stolen_model.h5")
+        convert_model(f"{stolen_name}.h5")
     elif cfgs['dataset_id'] == 'vww':
-        run_conversion("stolen_model.h5")
+        run_conversion(f"{stolen_name}.h5")
 
 
-    stolen_int8 = b.get_ml_quant_model("models/stolen_model_quant.tflite")
+    stolen_int8 = b.get_ml_quant_model(f"models/{stolen_name}_quant.tflite")
+
+    accuracy_train = b.get_accuracy_quant_model(stolen_int8, x_train_int8, y_train)
+    print("Int8 -> Train Accuracy: {}%".format(accuracy_train * 100))
 
     # Step 6: Evaluate the classifiers
     accuracy = b.get_accuracy_quant_model(stolen_int8, x_test_int8, y_test)
-    print("Int8 -> Accuracy: {}%".format(accuracy * 100))
+    print("Int8 -> Test Accuracy: {}%".format(accuracy * 100))
+
+    # Step 7: Get predictions from both the original and stolen model
+    preds_original = b.get_model_predictions(qnn_int8, x_test_int8, logits=True)  # Original model predictions
+    preds_stolen = b.get_model_predictions(stolen_int8, x_test_int8, logits=True)  # Stolen model predictions
+
+    # Step 8: Compare the predictions and calculate the ratio of matching predictions
+    matching_predictions = np.sum(preds_original == preds_stolen)  # Count matching predictions
+    total_predictions = len(preds_original)  # Total number of predictions
+
+    fidelity = matching_predictions / total_predictions  # Ratio of matching predictions
+    print(f"Fidelity: {fidelity * 100}%")
 
 
 if __name__ == '__main__':

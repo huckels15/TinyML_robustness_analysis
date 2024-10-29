@@ -28,7 +28,7 @@ IMAGE_SIZE = 96
 BATCH_SIZE = 32
 EPOCHS = 20
 
-BASE_DIR = os.path.join(os.getcwd(), 'vw_coco2014_96')
+BASE_DIR = os.path.join(os.getcwd(), '../Datasets/vw_coco2014_96')
 
 
 def main(argv):
@@ -72,8 +72,8 @@ def main(argv):
   if len(argv) >= 3:
     model.save(argv[2])
   else:
-    model_name = f'vww_96_{year}{month:02d}{day:02d}_{hour:02d}{minute:02d}'
-    model.save(f'trained_models/' + model_name)
+    model_name = f'vww_96_{year}{month:02d}{day:02d}_{hour:02d}{minute:02d}_testable.h5'
+    model.save(f'models/' + model_name)
 
 
 def train_epochs(model, train_generator, val_generator, epoch_count,

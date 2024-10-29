@@ -1,0 +1,16 @@
+Basic Arch Results:
+
+Basic Arch Results:
+
+Lenet Arch Results:
+
+Lenet Arch Results:
+
+Alexnet Arch Results:
+
+Alexnet Arch Results:
+
+Resnet Arch Results:
+
+Resnet Arch Results:
+

@@ -1,27 +1,70 @@
 #!/bin/bash
 DATASET_ID=cifar10
+BASIC=basic
+VGG=vgg
+LENET=lenet
+ALEXNET=alexnet
+RESNET=resnet
 DATASET_SIZE=1000
 NUM_CLASSES=10
-#ANN_FLOAT='models/cifar_resnet_float.h5'
-#ANN_FLOAT='models-defense_enhanced/cifar_adv_float.h5'
-#ANN_FLOAT='models-defense_enhanced/cifar_distil_float.h5'
-#ANN_FLOAT='models-defense_enhanced/cifar_ens_adv_float.h5'
-#ANN_FLOAT='models-defense_enhanced/cifar_sat_float.h5'
-#QNN_INT16='models/cifar_resnet_int16.tflite'
-#QNN_INT16='models-defense_enhanced/cifar_adv_int16.tflite'
-#QNN_INT16='models-defense_enhanced/cifar_distil_int16.tflite'
-#QNN_INT16='models-defense_enhanced/cifar_ens_adv_int16.tflite'
-#QNN_INT16='models-defense_enhanced/cifar_sat_int16.tflite'
+NB_EPOCS_100=100
+NB_EPOCS_80=80
+NB_STOLEN=50000
 
-QNN_INT8='models/trainedResnet_20241016_0827_quant.tflite'
-
-#QNN_INT8='models-defense_enhanced/cifar_adv_int8.tflite'
-#QNN_INT8='models-defense_enhanced/cifar_distil_int8.tflite'
-#QNN_INT8='models-defense_enhanced/cifar_ens_adv_int8.tflite'
-#QNN_INT8='models-defense_enhanced/cifar_sat_int8.tflite'
+QNN_INT8='models/trainedResnet_testable_quant.tflite'
 
 echo "=============================================================="
-echo "======================CopycatCNN=============================="
-python3 copycat_int8.py --dataset_id "$DATASET_ID" --num_classes "$NUM_CLASSES" --target_int8 "$QNN_INT8"
+echo "======================CopycatCNN -- Basic 50000 100 =============================="
+echo "Basic Arch Results:" >> copycat_cifar_results_50000_100_2.txt
+python3 copycat_int8.py --dataset_id "$DATASET_ID" --num_classes "$NUM_CLASSES" --nb_epochs "$NB_EPOCS_100" --nb_stolen "$NB_STOLEN" --target_int8 "$QNN_INT8" --theived_template "$BASIC" >> copycat_cifar_results_50000_100_2.txt
+echo "" >> copycat_cifar_results_50000_100_2.txt
+
+echo "=============================================================="
+echo "======================CopycatCNN -- Basic 50000 80 =============================="
+echo "Basic Arch Results:" >> copycat_cifar_results_50000_80.txt
+python3 copycat_int8.py --dataset_id "$DATASET_ID" --num_classes "$NUM_CLASSES" --nb_epochs "$NB_EPOCS_80" --nb_stolen "$NB_STOLEN" --target_int8 "$QNN_INT8" --theived_template "$BASIC" >> copycat_cifar_results_50000_80.txt
+echo "" >> copycat_cifar_results_50000_80.txt
+
+# echo "=============================================================="
+# echo "======================CopycatCNN -- VGG =============================="
+# echo "VGG Arch Results:" >> copycat_cifar_results.txt
+# python3 copycat_int8.py --dataset_id "$DATASET_ID" --num_classes "$NUM_CLASSES" --target_int8 "$QNN_INT8" --theived_template "$VGG" >> copycat_cifar_results.txt
+# echo "" >> copycat_cifar_results.txt
+
+echo "=============================================================="
+echo "======================CopycatCNN -- Lenet 50000 100 =============================="
+echo "Lenet Arch Results:" >> copycat_cifar_results_50000_100_2.txt
+python3 copycat_int8.py --dataset_id "$DATASET_ID" --num_classes "$NUM_CLASSES" --nb_epochs "$NB_EPOCS_100" --nb_stolen "$NB_STOLEN" --target_int8 "$QNN_INT8" --theived_template "$LENET" >> copycat_cifar_results_50000_100_2.txt
+echo "" >> copycat_cifar_results_50000_100_2.txt
+
+echo "=============================================================="
+echo "======================CopycatCNN -- Lenet 50000 80 =============================="
+echo "Lenet Arch Results:" >> copycat_cifar_results_50000_80.txt
+python3 copycat_int8.py --dataset_id "$DATASET_ID" --num_classes "$NUM_CLASSES" --nb_epochs "$NB_EPOCS_80" --nb_stolen "$NB_STOLEN" --target_int8 "$QNN_INT8" --theived_template "$LENET" >> copycat_cifar_results_50000_80.txt
+echo "" >> copycat_cifar_results_50000_80.txt
+
+echo "=============================================================="
+echo "======================CopycatCNN -- Alexnet 50000 100 =============================="
+echo "Alexnet Arch Results:" >> copycat_cifar_results_50000_100_2.txt
+python3 copycat_int8.py --dataset_id "$DATASET_ID" --num_classes "$NUM_CLASSES" --nb_epochs "$NB_EPOCS_100" --nb_stolen "$NB_STOLEN" --target_int8 "$QNN_INT8" --theived_template "$ALEXNET" >> copycat_cifar_results_50000_100_2.txt
+echo "" >> copycat_cifar_results_50000_100_2.txt
+
+echo "=============================================================="
+echo "======================CopycatCNN -- Alexnet 50000 80 =============================="
+echo "Alexnet Arch Results:" >> copycat_cifar_results_50000_80.txt
+python3 copycat_int8.py --dataset_id "$DATASET_ID" --num_classes "$NUM_CLASSES" --nb_epochs "$NB_EPOCS_80" --nb_stolen "$NB_STOLEN" --target_int8 "$QNN_INT8" --theived_template "$ALEXNET" >> copycat_cifar_results_50000_80.txt
+echo "" >> copycat_cifar_results_50000_80.txt
+
+echo "=============================================================="
+echo "======================CopycatCNN -- Resnet 50000 100 =============================="
+echo "Resnet Arch Results:" >> copycat_cifar_results_50000_100_2.txt
+python3 copycat_int8.py --dataset_id "$DATASET_ID" --num_classes "$NUM_CLASSES" --nb_epochs "$NB_EPOCS_100" --nb_stolen "$NB_STOLEN" --target_int8 "$QNN_INT8" --theived_template "$RESNET" >> copycat_cifar_results_50000_100_2.txt
+echo "" >> copycat_cifar_results_50000_100_2.txt
+
+echo "=============================================================="
+echo "======================CopycatCNN -- Resnet 50000 80 =============================="
+echo "Resnet Arch Results:" >> copycat_cifar_results_50000_80.txt
+python3 copycat_int8.py --dataset_id "$DATASET_ID" --num_classes "$NUM_CLASSES" --nb_epochs "$NB_EPOCS_80" --nb_stolen "$NB_STOLEN" --target_int8 "$QNN_INT8" --theived_template "$RESNET" >> copycat_cifar_results_50000_80.txt
+echo "" >> copycat_cifar_results_50000_80.txt
 
 

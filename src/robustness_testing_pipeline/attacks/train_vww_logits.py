@@ -65,15 +65,15 @@ def main(argv):
       color_mode='rgb')
   print(train_generator.class_indices)
 
-  model = train_epochs(model, train_generator, val_generator, 1, 0.001)
-  # model = train_epochs(model, train_generator, val_generator, 10, 0.0005)
-  # model = train_epochs(model, train_generator, val_generator, 20, 0.00025)
+  model = train_epochs(model, train_generator, val_generator, 20, 0.001)
+  model = train_epochs(model, train_generator, val_generator, 10, 0.0005)
+  model = train_epochs(model, train_generator, val_generator, 20, 0.00025)
 
   # Save model HDF5
   if len(argv) >= 3:
     model.save(argv[2])
   else:
-    model_name = f'vww_96_{year}{month:02d}{day:02d}_{hour:02d}{minute:02d}_logits.h5'
+    model_name = f'vww_96_{year}{month:02d}{day:02d}_{hour:02d}{minute:02d}_testable_logits.h5'
     model.save(f'models/' + model_name)
 
 

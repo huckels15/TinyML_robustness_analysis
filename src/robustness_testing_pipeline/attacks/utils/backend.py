@@ -186,3 +186,25 @@ def scale_to_unit_norm(data):
     data = data.reshape(shape)
 
     return data
+
+def get_model_predictions(model, x_test, logits=False):
+    input_details = model.get_input_details()
+    output_details = model.get_output_details()
+    predictions = []
+
+    for idx in range(x_test.shape[0]):
+        input_data = x_test[idx].reshape(input_details[0]['shape'])
+        model.set_tensor(input_details[0]['index'], input_data)
+        model.invoke()
+        output_data = model.get_tensor(output_details[0]['index'])
+        predictions.append(output_data.reshape(output_details[0]['shape'][1]))
+
+    predictions = np.array(predictions)
+
+    if logits:
+        predictions = predictions.astype(np.float32)
+        predictions = tf.nn.softmax(predictions).numpy()
+
+    predicted_classes = np.argmax(predictions, axis=1)
+
+    return predicted_classes

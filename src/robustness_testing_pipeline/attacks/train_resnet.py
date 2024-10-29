@@ -8,7 +8,7 @@ import keras_model
 
 import datetime
 
-EPOCHS = 100  #500
+EPOCHS = 500  #500
 BS = 32
 
 # get date ant time to save model
@@ -43,8 +43,8 @@ optimizer = tf.keras.optimizers.Adam()
 
 es = EarlyStopping(
     monitor="accuracy",
-    min_delta=0,
-    patience=5,
+    min_delta=0.001,
+    patience=10,
     verbose=0,
     mode="auto",
     baseline=None,
@@ -133,7 +133,7 @@ def load_cifar_10_data(data_dir, negatives=False):
 if __name__ == "__main__":
     """load cifar10 data and trains model"""
 
-    cifar_10_dir = '/Datasets/cifar-10-batches-py'
+    cifar_10_dir = '../Datasets/cifar-10-batches-py'
 
     train_data, train_filenames, train_labels, test_data, test_filenames, test_labels, label_names = \
         load_cifar_10_data(cifar_10_dir)
@@ -176,8 +176,8 @@ if __name__ == "__main__":
     History = new_model.fit(datagen.flow(train_data, train_labels, batch_size=BS),
               steps_per_epoch=int(len(train_data) // BS), epochs=EPOCHS, callbacks=[lr_scheduler, es])
 
-    plt.plot(np.array(range(EPOCHS)), History.history['loss'])
-    plt.plot(np.array(range(EPOCHS)), History.history['accuracy'])
-    plt.savefig('train_loss_acc.png')
-    model_name = f"trainedResnet_{year}{month:02d}{day:02d}_{hour:02d}{minute:02d}.h5"
-    new_model.save("../../attacks/models/" + model_name)
+    # plt.plot(np.array(range(EPOCHS)), History.history['loss'])
+    # plt.plot(np.array(range(EPOCHS)), History.history['accuracy'])
+    # plt.savefig('train_loss_acc.png')
+    model_name = f"trainedResnet_testable.h5"
+    new_model.save("models/" + model_name)
