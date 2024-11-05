@@ -13,7 +13,8 @@ from art.estimators.classification.tensorflow_int8 import TensorFlowV2Classifier
 from model_converter import representative_dataset_generator, convert_model
 from convert_vww import run_conversion
 from art.estimators.classification.tensorflow import TensorFlowV2Classifier
-import theived_templates_cifar
+import theived_templates_cifar as cifar_models
+import theived_templates_vww as vww_models
 import datetime
 
 dt = datetime.datetime.today()
@@ -23,20 +24,11 @@ day = dt.day
 hour = dt.hour
 minute = dt.minute
 
-def create_theived_model_vww():
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(96, 96, 3)))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
-    model.add(Dense(2, activation='linear'))
-    return model
-
 def load_configs():
     parser = ArgumentParser(add_help=True)
     parser.add_argument("--dataset_id", type=str, default=None, help="dataset to use: cifar10 or vww")
-    parser.add_argument("--batch_size_fit", type=int, default=64, help="number of samples to perturb")
-    parser.add_argument("--batch_size_query", type=str, default=64, help="path to save the adversarial examples")
+    parser.add_argument("--batch_size_fit", type=int, default=32, help="number of samples to perturb")
+    parser.add_argument("--batch_size_query", type=str, default=32, help="path to save the adversarial examples")
     parser.add_argument("--nb_epochs", type=float, default=100, help="")
     parser.add_argument("--nb_stolen", type=float, default=50000, help="")
     parser.add_argument("--num_classes", type=int, default=10, help="number of classes in target models")
@@ -80,23 +72,41 @@ def main():
         task = "cifar"
         input_shape = (32,32,3)
         if cfgs['theived_template'] == 'vgg': 
-            thieved_model = theived_templates_cifar.create_vgg16_logits()
+            thieved_model = cifar_models.create_vgg16_logits()
             arch = 'vgg'
         elif cfgs['theived_template'] == 'lenet': 
-            thieved_model = theived_templates_cifar.create_lenet_logits()
+            thieved_model = cifar_models.create_lenet_logits()
             arch = 'lenet'
         elif cfgs['theived_template'] == 'alexnet': 
-            thieved_model = theived_templates_cifar.create_alexnet_logits()
+            thieved_model = cifar_models.create_alexnet_logits()
             arch = 'alexnet'
         elif cfgs['theived_template'] == 'resnet': 
-            thieved_model = theived_templates_cifar.create_resnet_logits()
+            thieved_model = cifar_models.create_resnet_logits()
             arch = 'resnet'
         else: 
-            thieved_model = theived_templates_cifar.create_basic_logits()
+            thieved_model = cifar_models.create_basic_logits()
             arch = 'basic'
     elif cfgs['dataset_id'] == 'vww':
+        task = "vww"
         input_shape = (96,96,3)
-        thieved_model = create_theived_model_vww()
+        if cfgs['theived_template'] == 'vgg': 
+            thieved_model = vww_models.create_vgg16_logits()
+            arch = 'vgg'
+        elif cfgs['theived_template'] == 'lenet': 
+            thieved_model = vww_models.create_lenet_logits()
+            arch = 'lenet'
+        elif cfgs['theived_template'] == 'alexnet': 
+            thieved_model = vww_models.create_alexnet_logits()
+            arch = 'alexnet'
+        elif cfgs['theived_template'] == 'resnet':
+            thieved_model = vww_models.create_resnet_logits()
+            arch = 'resnet'
+        elif cfgs['theived_template'] == 'mobilenet': 
+            thieved_model = vww_models.create_mobilenet_logits()
+            arch = 'mobilenet'
+        else: 
+            thieved_model = vww_models.create_basic_logits()
+            arch = 'basic'
 
     # Step 2: Load ANN/QNNs
     qnn_int8 = b.get_ml_quant_model(cfgs['target_int8'])
@@ -110,7 +120,7 @@ def main():
         x_train_float, y_train = ds.get_cifar10_train_ds_f32()
         x_test_float, y_test = ds.get_cifar10_test_ds_f32()
     elif cfgs['dataset_id'] == 'vww':
-        # x_train_float, y_train = ds.get_vww_train_ds_f32() # PUT THIS BACK
+        x_train_float, y_train = ds.get_vww_train_ds_f32() # PUT THIS BACK
         x_test_float, y_test = ds.get_vww_test_ds_f32()
 
     # x_test_float, y_test = x_test_float[0:1000], y_test[0:1000]

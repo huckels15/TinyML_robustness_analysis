@@ -12,17 +12,16 @@ from vww_model_logits import mobilenet_v1_logits
 
 #keras deep-cv
 
-
 def create_basic():
     model = Sequential()
-    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
+    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(96, 96, 3)))
     model.add(MaxPooling2D((2, 2)))
     model.add(Conv2D(64, (3, 3), activation='relu'))
     model.add(MaxPooling2D((2, 2)))
     model.add(Flatten())
     model.add(Dense(128, activation='relu'))
     model.add(Dense(64, activation='relu'))  # Added another dense layer for a better balance
-    model.add(Dense(10, activation='softmax'))
+    model.add(Dense(2, activation='softmax'))
     return model
 
 def create_lenet():
@@ -32,7 +31,7 @@ def create_lenet():
 
 	# 2 sets of CRP (Convolution, RELU, Pooling)
 	lenet.add(Conv2D(32, (5, 5), padding="same",
-		input_shape=(32, 32, 3), kernel_regularizer=l2(0.)))
+		input_shape=(96, 96, 3), kernel_regularizer=l2(0.)))
 	lenet.add(Activation("relu"))
 	lenet.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 
@@ -47,7 +46,7 @@ def create_lenet():
 	lenet.add(Activation("relu"))
 
 	# Softmax (for classification)
-	lenet.add(Dense(10, kernel_regularizer=l2(0.)))
+	lenet.add(Dense(2, kernel_regularizer=l2(0.)))
 	lenet.add(Activation("softmax"))
 
 	# Return the constructed network
@@ -57,7 +56,7 @@ def create_alexnet():
     alexnet = Sequential()
 
     # Layer 1: Conv -> ReLU -> MaxPool
-    alexnet.add(Conv2D(64, (3, 3), input_shape=(32, 32, 3), padding='same', kernel_regularizer=l2(0.0005)))
+    alexnet.add(Conv2D(64, (3, 3), input_shape=(96, 96, 3), padding='same', kernel_regularizer=l2(0.0005)))
     alexnet.add(Activation('relu'))
     alexnet.add(MaxPooling2D(pool_size=(2, 2)))
 
@@ -89,15 +88,15 @@ def create_alexnet():
     alexnet.add(Dropout(0.5))
 
     # Output layer
-    alexnet.add(Dense(10, activation='softmax'))
+    alexnet.add(Dense(2, activation='softmax'))
 
     return alexnet
 
 
 def create_resnet():
 
-    input_shape=[32,32,3]
-    num_classes=10
+    input_shape=[96, 96, 3]
+    num_classes=2
     num_filters = 16
 
     inputs = Input(shape=input_shape)
@@ -196,14 +195,14 @@ def create_resnet():
 
 def create_basic_logits():
     model = Sequential()
-    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
+    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(96, 96, 3)))
     model.add(MaxPooling2D((2, 2)))
     model.add(Conv2D(64, (3, 3), activation='relu'))
     model.add(MaxPooling2D((2, 2)))
     model.add(Flatten())
     model.add(Dense(128, activation='relu'))
     model.add(Dense(64, activation='relu'))  # Added another dense layer for a better balance
-    model.add(Dense(10, activation='linear'))
+    model.add(Dense(2, activation='linear'))
 
     return model
 
@@ -214,7 +213,7 @@ def create_lenet_logits():
 
 	# 2 sets of CRP (Convolution, RELU, Pooling)
 	lenet.add(Conv2D(32, (5, 5), padding="same",
-		input_shape=(32, 32, 3), kernel_regularizer=l2(0.)))
+		input_shape=(96, 96, 3), kernel_regularizer=l2(0.)))
 	lenet.add(Activation("relu"))
 	lenet.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 
@@ -229,7 +228,7 @@ def create_lenet_logits():
 	lenet.add(Activation("relu"))
 
 	# Softmax (for classification)
-	lenet.add(Dense(10, kernel_regularizer=l2(0.)))
+	lenet.add(Dense(2, kernel_regularizer=l2(0.)))
 
 	# Return the constructed network
 	return lenet
@@ -238,7 +237,7 @@ def create_alexnet_logits():
     alexnet = Sequential()
 
     # Layer 1: Conv -> ReLU -> MaxPool
-    alexnet.add(Conv2D(64, (3, 3), input_shape=(32, 32, 3), padding='same', kernel_regularizer=l2(0.0005)))
+    alexnet.add(Conv2D(64, (3, 3), input_shape=(96, 96, 3), padding='same', kernel_regularizer=l2(0.0005)))
     alexnet.add(Activation('relu'))
     alexnet.add(MaxPooling2D(pool_size=(2, 2)))
 
@@ -270,14 +269,14 @@ def create_alexnet_logits():
     alexnet.add(Dropout(0.5))
 
     # Output layer
-    alexnet.add(Dense(10, activation='linear'))
+    alexnet.add(Dense(2, activation='linear'))
 
     return alexnet
 
 
 def create_resnet_logits():
-    input_shape=[32,32,3]
-    num_classes=10
+    input_shape=[96, 96, 3]
+    num_classes=2
     num_filters = 16
 
     inputs = Input(shape=input_shape)

@@ -96,7 +96,7 @@ def get_vww_test_ds_f32():
     return data_test, labels_test
 
 
-def get_vww_train_ds_f32():
+def get_vww_train_ds_f32(batch_limit=625):  # Add a batch_limit parameter
     data_train = []
     labels_train = []
     data_dir = os.path.join(os.path.dirname(__file__), '../../Datasets/vw_coco2014_96')
@@ -116,18 +116,19 @@ def get_vww_train_ds_f32():
     train_generator = datagen.flow_from_directory(
         data_dir,
         target_size=(96, 96),
-        batch_size=1,
+        batch_size=32,
         subset='training',  # Use the 'training' subset
         color_mode='rgb',
         shuffle=False
     )
 
     batch_index = 0
-    while batch_index < train_generator.n:
+    # Loop through the batches, stopping early once the batch_limit is reached
+    while batch_index < batch_limit and batch_index < train_generator.n:
         data = next(train_generator)  # Get the next batch of images and labels
         data_train.append(data[0][0])  # Append image data
         labels_train.append(np.argmax(data[1][0]))  # Append the label (one-hot to class index)
-        batch_index = batch_index + 1
+        batch_index += 1
 
     data_train = np.array(data_train)
     labels_train = tf.one_hot(labels_train, 2).numpy()  # One-hot encode the labels

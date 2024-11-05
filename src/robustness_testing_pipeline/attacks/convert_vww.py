@@ -13,7 +13,7 @@ def main(argv):
     model = tf.keras.models.load_model("models/" + argv[1])
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     tflite_model = converter.convert()
-    with tf.io.gfile.GFile('models/vww_96_float.tflite', 'wb') as float_file:
+    with tf.io.gfile.GFile('models/vww_96_float_testable.tflite', 'wb') as float_file:
         float_file.write(tflite_model)
 
     converter.optimizations = [tf.lite.Optimize.DEFAULT]

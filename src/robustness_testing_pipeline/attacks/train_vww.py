@@ -72,7 +72,7 @@ def main(argv):
   if len(argv) >= 3:
     model.save(argv[2])
   else:
-    model_name = f'vww_96_{year}{month:02d}{day:02d}_{hour:02d}{minute:02d}_testable.h5'
+    model_name = f'vww_96_testable.h5'
     model.save(f'models/' + model_name)
 
 

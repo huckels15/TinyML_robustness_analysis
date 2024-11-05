@@ -25,12 +25,6 @@ echo "Basic Arch Results:" >> copycat_cifar_results_50000_80.txt
 python3 copycat_int8.py --dataset_id "$DATASET_ID" --num_classes "$NUM_CLASSES" --nb_epochs "$NB_EPOCS_80" --nb_stolen "$NB_STOLEN" --target_int8 "$QNN_INT8" --theived_template "$BASIC" >> copycat_cifar_results_50000_80.txt
 echo "" >> copycat_cifar_results_50000_80.txt
 
-# echo "=============================================================="
-# echo "======================CopycatCNN -- VGG =============================="
-# echo "VGG Arch Results:" >> copycat_cifar_results.txt
-# python3 copycat_int8.py --dataset_id "$DATASET_ID" --num_classes "$NUM_CLASSES" --target_int8 "$QNN_INT8" --theived_template "$VGG" >> copycat_cifar_results.txt
-# echo "" >> copycat_cifar_results.txt
-
 echo "=============================================================="
 echo "======================CopycatCNN -- Lenet 50000 100 =============================="
 echo "Lenet Arch Results:" >> copycat_cifar_results_50000_100_2.txt
