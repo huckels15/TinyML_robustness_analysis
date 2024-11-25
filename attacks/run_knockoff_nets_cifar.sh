@@ -1,14 +1,19 @@
 #!/bin/bash
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <nb_epochs> <nb_stolen>"
+    exit 1
+fi
+
+NB_EPOCS=$1
+NB_STOLEN=$2
+
 DATASET_ID=cifar10
 DATASET_SIZE=1000
 NUM_CLASSES=10
 BASIC=basic
-VGG=vgg
 LENET=lenet
 ALEXNET=alexnet
 RESNET=resnet
-NB_EPOCS=100
-NB_STOLEN=50000
 
 QNN_INT8='src/robustness_testing_pipeline/models/target_models/trainedResnet_testable_logits_quant.tflite'
 

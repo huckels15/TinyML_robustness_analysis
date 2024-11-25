@@ -1,16 +1,21 @@
 #!/bin/bash
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <nb_epochs> <nb_stolen>"
+    exit 1
+fi
+
+NB_EPOCS=$1
+NB_STOLEN=$2
+
+
 DATASET_ID=vww
 DATASET_SIZE=1000
 NUM_CLASSES=2
 BASIC=basic
-VGG=vgg
 LENET=lenet
 ALEXNET=alexnet
 RESNET=resnet
 MOB=mobilenet
-DATASET_SIZE=1000
-NB_EPOCS=100
-NB_STOLEN=40000
 
 QNN_INT8='src/robustness_testing_pipeline/models/target_models/vww_96_testable_quant.tflite'
 
