@@ -11,7 +11,7 @@ NB_EPOCS_100=1 #NB_EPOCS_100=100
 NB_EPOCS_80=80
 NB_STOLEN=10 #NB_STOLEN=50000
 
-QNN_INT8='src/robustness_testing_pipeline/models/trainedResnet_testable_logits_quant.tflite'
+QNN_INT8='src/robustness_testing_pipeline/models/target_models/trainedResnet_testable_logits_quant.tflite'
 
 
 echo "=============================================================="

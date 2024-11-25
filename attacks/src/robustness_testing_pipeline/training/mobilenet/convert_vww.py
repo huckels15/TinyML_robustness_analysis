@@ -10,10 +10,10 @@ BASE_DIR = os.path.join(os.getcwd(), "src/robustness_testing_pipeline/Datasets/v
 def main(argv):
     if len(argv) != 2:
         raise app.UsageError('Usage: convert_vww.py <model_to_convert.h5>')
-    model = tf.keras.models.load_model("src/robustness_testing_pipeline/models/" + argv[1])
+    model = tf.keras.models.load_model("src/robustness_testing_pipeline/models/fp_models/" + argv[1])
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     tflite_model = converter.convert()
-    with tf.io.gfile.GFile('src/robustness_testing_pipeline/models/' + argv[1][:-3] + "_float.tflite", 'wb') as float_file:
+    with tf.io.gfile.GFile('src/robustness_testing_pipeline/models/tflite_models' + argv[1][:-3] + "_float.tflite", 'wb') as float_file:
         float_file.write(tflite_model)
 
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
@@ -37,7 +37,7 @@ def main(argv):
     converter.inference_input_type = tf.int8
     converter.inference_output_type = tf.int8
     quantized_tflite_model = converter.convert()
-    with tf.io.gfile.GFile('src/robustness_testing_pipeline/models/' + argv[1][:-3] + '_quant.tflite', 'wb') as quantized_file:
+    with tf.io.gfile.GFile('src/robustness_testing_pipeline/models/quant_models' + argv[1][:-3] + '_quant.tflite', 'wb') as quantized_file:
         quantized_file.write(quantized_tflite_model)
 
 

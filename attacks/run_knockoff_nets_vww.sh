@@ -12,7 +12,7 @@ NB_EPOCS_100=100
 NB_EPOCS_80=80
 NB_STOLEN=50000
 
-QNN_INT8='models/vww_96_testable_logits_quant.tflite'
+QNN_INT8='src/robustness_testing_pipeline/models/target_models/vww_96_testable_logits_quant.tflite'
 
 echo "=============================================================="
 echo "======================KnockoffNets -- Basic 50000 100 =============================="

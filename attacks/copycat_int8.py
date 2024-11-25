@@ -136,7 +136,7 @@ def main():
     stolen_model = attack.extract(x_train_float, y_train, thieved_classifier=thieved_classifier)
 
     stolen_name = f"stolen_{arch}_{task}_{year}{month:02d}{day:02d}_{hour:02d}{minute:02d}"
-    stolen_model.model.save(f"src/robustness_testing_pipeline/models/{stolen_name}.h5")
+    stolen_model.model.save(f"src/robustness_testing_pipeline/models/fp_models/{stolen_name}.h5")
 
     if cfgs['dataset_id'] == 'cifar10':
         convert_model(f"{stolen_name}.h5")
@@ -144,7 +144,7 @@ def main():
         run_conversion(f"{stolen_name}.h5")
 
 
-    stolen_int8 = b.get_ml_quant_model(f"src/robustness_testing_pipeline/models/{stolen_name}_quant.tflite")
+    stolen_int8 = b.get_ml_quant_model(f"src/robustness_testing_pipeline/models/quant_models/{stolen_name}_quant.tflite")
 
     accuracy_train = b.get_accuracy_quant_model(stolen_int8, x_train_int8, y_train)
     print("Int8 -> Train Accuracy: {}%".format(accuracy_train * 100))
