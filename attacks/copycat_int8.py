@@ -1,4 +1,5 @@
 import tensorflow as tf
+import keras
 import numpy as np
 from argparse import ArgumentParser
 import utils.backend as b
@@ -16,6 +17,8 @@ from src.robustness_testing_pipeline.art.estimators.classification.tensorflow im
 import src.robustness_testing_pipeline.theived_templates_cifar as cifar_models
 import src.robustness_testing_pipeline.theived_templates_vww as vww_models
 import datetime
+import tensorflow_model_optimization as tfmot
+from sklearn.model_selection import train_test_split
 
 dt = datetime.datetime.today()
 year = dt.year
@@ -36,6 +39,7 @@ def load_configs():
     parser.add_argument("--target_int8", type=str, default=None, help="path to the int-8 QNN")
     parser.add_argument("--model_folder", type=str, default="/models", help="path to save thieved model")
     parser.add_argument("--theived_template", type=str, default="basic", help="theived model architecture")
+    parser.add_argument("--qat", action='store_true')
 
     cfgs = parser.parse_args()
 
@@ -49,9 +53,19 @@ def load_configs():
 
     return run_cfgs
 
-
 @tf.function
 def train_step(model, images, labels):
+    with tf.GradientTape() as tape:
+        predictions = model(images, training=True)
+        loss = tf.keras.losses.categorical_crossentropy(labels, predictions)
+
+    gradients = tape.gradient(loss, model.trainable_variables)
+    model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+
+    return loss
+
+@tf.function
+def train_step_qat(model, images, labels):
     with tf.GradientTape() as tape:
         predictions = model(images, training=True)
         loss = tf.keras.losses.categorical_crossentropy(labels, predictions)
@@ -137,6 +151,32 @@ def main():
 
     stolen_name = f"stolen_{arch}_{task}_{year}{month:02d}{day:02d}_{hour:02d}{minute:02d}"
     stolen_model.model.save(f"src/robustness_testing_pipeline/models/fp_models/{stolen_name}.h5")
+
+    if cfgs['qat']:
+        x_train, x_train_qat, y_train_tmp, y_train_qat = train_test_split(x_train_float, y_train, test_size = 0.2)
+        attack_qat = CopycatCNN_Int8(classifier=art_classifier, batch_size_fit=cfgs['batch_size_fit'],\
+        batch_size_query=cfgs['batch_size_query'], nb_epochs=10, nb_stolen=len(x_train_qat))
+        quantize_model = tfmot.quantization.keras.quantize_model
+        q_aware_model = quantize_model(stolen_model.model)
+        q_aware_model.compile(
+            optimizer='adam',
+            loss="categorical_crossentropy",
+            metrics=['accuracy'],
+        )
+        qat_thieved_class = TensorFlowV2Classifier(model=q_aware_model, nb_classes=cfgs['num_classes'], input_shape=input_shape, train_step=train_step_qat)
+        stolen_model_qat = attack_qat.extract(x_train_qat, y_train_qat, thieved_classifier=qat_thieved_class)
+        test_loss, test_acc = stolen_model_qat.model.evaluate(x_test_float, y_test)
+        preds_og = b.get_model_predictions(qnn_int8, x_test_int8)
+        preds_qat = stolen_model_qat.model.predict(x_test_float)
+        preds_qat_classes = np.argmax(preds_qat, axis=1)
+
+        matching_predictions = np.sum(preds_og == preds_qat_classes)
+        total_predictions = len(preds_og)
+
+        fidelity = matching_predictions / total_predictions 
+        print(f"QAT test acc: {test_acc * 100}%\nFidelity:{fidelity * 100}%")
+        stolen_model_qat.model.save(f"src/robustness_testing_pipeline/models/qat_models/{stolen_name}_qat_test.h5")
+
 
     if cfgs['dataset_id'] == 'cifar10':
         convert_model(f"{stolen_name}.h5")

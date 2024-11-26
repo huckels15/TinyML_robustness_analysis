@@ -22,12 +22,12 @@ def representative_dataset_generator():
         yield [sample_img]
 
 def convert_model(model_name):
-    tfmodel_path = 'src/robustness_testing_pipeline/models/fp_models' + model_name
+    tfmodel_path = 'src/robustness_testing_pipeline/models/fp_models/' + model_name
     tfmodel = tf.keras.models.load_model(tfmodel_path)
     model_name = model_name[:-3]
     converter = tf.lite.TFLiteConverter.from_keras_model(tfmodel)
     tflite_model = converter.convert()
-    open('src/robustness_testing_pipeline/models/tflite_models' + model_name + '.tflite', 'wb').write(tflite_model)
+    open('src/robustness_testing_pipeline/models/tflite_models/' + model_name + '.tflite', 'wb').write(tflite_model)
 
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
@@ -35,4 +35,4 @@ def convert_model(model_name):
     converter.inference_input_type = tf.int8
     converter.inference_output_type = tf.int8
     tflite_quant_model = converter.convert()
-    open('src/robustness_testing_pipeline/models/quant_models' + model_name + '_quant.tflite', 'wb').write(tflite_quant_model)
+    open('src/robustness_testing_pipeline/models/quant_models/' + model_name + '_quant.tflite', 'wb').write(tflite_quant_model)
